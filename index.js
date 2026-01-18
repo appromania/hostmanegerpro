@@ -1,4 +1,17 @@
-// Adaugă asta la începutul index.js pentru pagina principală
+const express = require('express');
+const cors = require('cors');
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
+
+const app = express();
+
+// CONFIGURARE
+app.use(cors({ origin: '*', methods: ['GET', 'POST'] }));
+app.use(express.json());
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+// 1. PAGINA PRINCIPALĂ (Fix pentru "Cannot GET /")
 app.get('/', (req, res) => {
     res.json({
         mesaj: "Backend HostManagerPro este ONLINE 🚀",
@@ -7,49 +20,30 @@ app.get('/', (req, res) => {
     });
 });
 
-// Endpoint-ul pentru BRIEF-ul de care ai nevoie în setări
+// 2. ENDPOINT PENTRU BRIEF (Rezumat setări)
 app.get('/api/v1/backend-summary', (req, res) => {
     res.json({
         provider: "Render + Supabase",
         baseUrl: "https://hostmanegerpro.onrender.com",
         environment: "DEVELOPMENT",
-        database: "Conectată (Postgres)",
+        database: "SUPABASE CONNECTED 🟢",
         activeStatus: "🟢 Serverul răspunde corect"
     });
 });
 
-const express = require('express');
-const cors = require('cors');
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
-
-const app = express();
-app.use(cors({ origin: '*', methods: ['GET', 'POST'] })); // Deblochează butoanele din base44
-app.use(express.json());
-
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
-// Endpoint pentru Rezumatul de care ai nevoie (Brief)
-app.get('/api/v1/backend-summary', (req, res) => {
-    res.json({
-        provider: "Firebase/Render",
-        base_url: "https://hostmanegerpro.onrender.com",
-        status: "ACTIVE 🟢",
-        database: "SUPABASE CONNECTED 🟢",
-        environment: "DEV"
-    });
-});
-
-// Endpoint-uri pentru Teste
+// 3. ENDPOINT-URI PENTRU TESTE (Rooms, Reservations, etc.)
 const endpoints = ['rooms', 'reservations', 'channels', 'pricing', 'guests', 'payments', 'reviews', 'notifications'];
 endpoints.forEach(item => {
     app.get(`/api/v1/${item}`, async (req, res) => {
         // Mapăm la tabelul corect (Ex: rooms -> Room)
         const table = item.charAt(0).toUpperCase() + item.slice(0, -1);
-        const { data, error } = await supabase.from(table).select('*').limit(1);
-        
-        if (error) return res.json({ status: "Eroare DB ❌", message: error.message });
-        res.json({ status: "Conexiune OK ✅", info: `Test reusit pentru ${item}`, data: data });
+        try {
+            const { data, error } = await supabase.from(table).select('*').limit(1);
+            if (error) return res.json({ status: "Eroare DB ❌", message: error.message });
+            res.json({ status: "Conexiune OK ✅", info: `Test reusit pentru ${item}`, data: data });
+        } catch (err) {
+            res.json({ status: "Eroare Server ⚠️", message: err.message });
+        }
     });
 });
 
