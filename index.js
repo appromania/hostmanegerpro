@@ -5,11 +5,15 @@ require('dotenv').config();
 
 const app = express();
 
-// CONFIGURARE
-app.use(cors({ origin: '*', methods: ['GET', 'POST'] }));
-app.use(express.json());
+app.use(cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true
+}));
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+// Adaugă și acest handler pentru cererile de tip OPTIONS (pre-flight)
+app.options('*', cors());
 
 // 1. PAGINA PRINCIPALĂ (Fix pentru "Cannot GET /")
 app.get('/', (req, res) => {
