@@ -1,3 +1,23 @@
+// Adaugă asta la începutul index.js pentru pagina principală
+app.get('/', (req, res) => {
+    res.json({
+        mesaj: "Backend HostManagerPro este ONLINE 🚀",
+        brief: "Folosește /api/v1/ pentru date",
+        status: "Sistem activ"
+    });
+});
+
+// Endpoint-ul pentru BRIEF-ul de care ai nevoie în setări
+app.get('/api/v1/backend-summary', (req, res) => {
+    res.json({
+        provider: "Render + Supabase",
+        baseUrl: "https://hostmanegerpro.onrender.com",
+        environment: "DEVELOPMENT",
+        database: "Conectată (Postgres)",
+        activeStatus: "🟢 Serverul răspunde corect"
+    });
+});
+
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
